@@ -1,0 +1,187 @@
+\documentclass[final,3p,times]{elsarticle}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+
+\journal{Journal of Computational Physics}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Computarional identifiability analysis of cosmololgical models: a Bayesian and profile likelihood approach}
+
+
+\author[UERJ - IPRJ]{Pedro Mineiro Cordoeira\corref{cor1}} %% Author name
+\ead{pedro.cordoeira@iprj.uerj.br}
+
+\author[UERJ - IPRJ]{Gustavo Barbosa Libotte}
+
+\author[UFRJ - IP]{Marcela Campista Borges de Carvalho}
+
+\affiliation[UERJ - IPRJ]{organization={Universidade do Estado do Rio de Janeiro, Departamento de Modelagem Computacional},
+            addressline={Instituto Politécnico},
+            city={Nova Friburgo},
+            postcode={28625-570},
+            state={RJ},
+            country={Brasil}}
+
+\affiliation[UFRJ - IP]{organization={Universidade Federal do Estado do Rio de Janeiro, Centro Multidisciplinar},
+            addressline={Instituto Politécnico},
+            city={Macaé},
+            postcode={27930-560},
+            state={RJ},
+            country={Brasil}}
+
+\begin{abstract}
+
+The $\Lambda\text{CDM}$ model faces observational tensions that motivates the investigation of alternative models, such as interaction dark energy (IDE) scenarios or the inclusion of spatial curvature parameter $\Omega_{\kappa}$. Rigorous comparison requires robust computational methods for parameter estimation, model selection and, crucially, indentifiability analysis. This work presents a computational framework integrating baysian inference via affine-invariant MCMC, information criteria (AIC, BIC) and profile likelihood based indentifiability to asses competing cosmological models: flat $\Lambda \text{CDM}$, $\Lambda\text{CDM} + \Omega_{\kappa}$, a flat IDE model and an $\text{IDE}+\Omega_{\kappa}$. Utilizing cosmic chronometer (CC) $H(z)$ data, we perform parameter estimation and model selection enphasizing the application of profile likelihood analysis, a computationally intensive yet robust method to rigorously evaluate the parameter identifiability. This analysis reveals potentional degenerancies and estimation limitations no fully captured by the standard credibility intervals derived from marvinal posterior distribuitions. Results indicate that while flat $\Lambda\text{CDM}$ remains statistically preferred according to AIC and BIC, the profile likelihood analysis demostrates specific identifiability challenges, particularly concerning the curvature parameter $\Omega_{\kappa}$ and the interaction parameter $\varepsilon$, especially when considered simultaneously in the $\text{IDE}+\Omega_{\kappa}$ model. This underscores the necessity of incorporating systematic computational identifiability analysis whitin the workflow for evaluating complex physical models, ensuring the reliability of parameter estimates and physical interpretations.
+
+\end{abstract}
+
+\begin{keyword}
+
+Cosmological Parameters \sep Identifiability Analysis \sep Bayesian Inference \sep MCMC \sep Profile Likelihood \sep Model Selection \sep Computational Physics \sep Dark Energy.
+
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Modern cosmology has achieved remarkable success in describing the large-scale struture of the Universe primarily throught the $\Lambda\text{CDM}$ model~\cite{PeeblesRatra2003,Planck2020}.
+Grounded in Einstein's General Relativity and corroborated by a vast array of observations like the Cosmic Microwave Background (CMB)\cite{Hinshaw2013}, Type Ia supernovae (SNe Ia)~\cite{Perlmutter1999,Riess1998}, and the distribuition of galacies~\cite{Einstein2005} offering a consistent understandig of the cosmos.
+However, dispite the success, the $\Lambda\text{CDM}$ model faces persistent challenges and tensions in some key parameters like the "Hubble tension". This problem shows a significant discrepancy between measurements of the current expansion rate of the Universe $H_0$ obtained from observations of the early Universe (e.g., CMB) and from local sources (e.g. SNe Ia)~\cite{Riess2019,Verde2019}.
+Additionally, theoretical issues like the cosmological constant problem and the coincidence problem motivate the exploration alternative cosmological models.
+
+These optional models involve the introduction of new components, such as dynamical dark energy~\cite{}, modifications to gravitity~\cite{}, or the consideration of intercation between the dark sectors~\cite{Wang2016,Yang2019_IDE_example}. The inclusion of a non-zero spatial curvature parameter $\Omega_{kappa}$ also represents a common extension~\cite{}.
+The development of these models raises questions like how roboustly and obectively select the model that best describes the Universe balancing complexity with the observational data.
+
+In this context, statistical inference methods, particularly Bayesian inference, have become an great tool in cosmology~\cite{Trotta2008}. The Bayesian approach allows the incorporation of prior knowledge, quantification of uncertainties, and model comparision through metrics like Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC)~\cite{Liddle2007,Akaike1974}.
+This criteria penalize model complexity, favoring parsimony and simplicity. Markov Chain Monte Carlo (MCMC) algorithms, such as Ensemble Samplers wirth Affine Invariance~\cite{GoodmanWeare2010} are widely used to explore parameters spaces with high dimensions and sample posterior distribuitions.
+
+Regardless, a critical step, often under-explored in cosmological analysis, precedes and qualifies model selection and parameter interpretation: identifiability analysis.
+Identifiability refers the ability to uniquely estimate a model's parameters from an set of observational data~\cite{WalterPronzato1997,Raue2009}. A model might provide an excellent fit to the data, but if its parameters are unidentifiable or poorly identifiable, the physical conclusions can be spurious or ambiguous.
+These aspects can arise from intrinsic functional relationships within relationships within the mathematical structure of the model (structural unidentifiability) or due to limited (and quality) of experimental data (pratical unidentifiability)~\cite{CobelliDiStefano1980, Raue2009}.
+Identifiability problmes often manifest as degenerancies between parameters where differnt parametrical combinations produce indistiguishable predictions, rendering unique inference impossible~\cite{Hines2014_example}.
+
+The neglect of identifiability analysis in cosmological research, as like in other areas of computational modeling, can have significant consequences for scientific achievements. Firstly, unidentifiable parameters can lead to misleading interpretations. If one parameter cannot be uniquely inferred, any value, even if associated with a good statistical fit, lacks roboustness and may not reflect a true porperty of the system.
+Secondly, the presence of unidentifiabilities compromises the selection of competing models. If a model's parameters are degenerate, its predictive power are masked hindering the distinction between good models and those that merely add redundant degrees of freedom~\cite{Raue2009}. To this, profile likelihood analysis emerges as a powerful technique to investigate the practical identifiability of each parameter indiviadually by revealing how the likelihood behaves across the parameter space.
+
+Another aspect in identifiability rests on the efficient planning of future experiments and observations. Identifying poorly constrined or unidentifiable parameters directly points to the limitations of current data and can guide new observational strategies~\cite{VillaescusaNavarro2020_example}.
+Without a clear understandig of identifiability, significant investiments in new data collection may not yield the expected return . The lack of systematic identifiability analysis can, therefore, lead to a research cycle where increasingly complex models are proposed and fitted, without a guarantee that the newly introduced parameters are genuinely significant os distinguishable.
+
+This work aims to addres this gap by conducting a systematic identifiability analysis of parameters in standard $\Lambda\text{CDM}$ model, in extanded model with spatial curvature and interactions in the dark sector. Using cosmic chronometer data, we apply Bayesian inference metods, MCMC techniques, information criteria and profile likelihood analysis to assess not only the model's fit but also the uniqueness of their estimate. Our objective is to provide insights into current limitations and to highlight the fundamental importance of identifiability analysis for the reliable interpretation of cosmological models.
+
+\section{Cosmological Models}
+\label{sec:models}
+
+To understand the mathematical formalism and the basis of the cosmological models investigated in this study, we begin with the standard $\Lambda\text{CDM}$ model and its common extension incorporating the spatial curvature, followed by a description of the interacting dark energy models. For each one of them, we explicitly define the parameter and identifiability analysis.
+
+\subsection{The $\Lambda\text{CDM}$ models}
+\label{subsec:lcdm}
+
+The dynamics of a homogeneous and isotropic Universe are governed by the Friedmann equations, derived from Einstein's field equations assuming the Friedmann-Lemaître-Robertson_Walker (FLRW) metric in spherical comoving coordinates $(t, r, \theta, \phi)$ is given by:
+\begin{equation}
+    ds^2 = -c^2 dt^2 + a(t)^2 \left[ \frac{dr^2}{1-\kappa r^2/R_0^2} + r^2(d\theta^2 + \sin^2\theta d\phi^2) \right]
+    \label{eq:flrw_metric}
+\end{equation}
+
+where $c$ is the speed of light $a(t)$ is the scale factor normalized such that $a(t_0)=1$, $\kappa$ is the curvature index ($\kappa = +1, 0, -1$ for closed, flat or  open Universes respectively), and $R_0$ is the present-day radius of curvature (related to $\Omega_{\kappa0}$).
+From this metric, we can obtain the Friedmann equations:
+\begin{equation}
+    \left(\frac{\dot{a}}{a}\right)^2 = \frac{8 \pi G}{3}\rho - \frac{\kappa}{a^2} + \frac{\Lambda}{3},
+    \label{eq:friedmann-1}
+\end{equation}
+\begin{equation}
+    \frac{\ddot{a}}{a} = -\frac{4 \pi G}{3} (\rho + 3p) + \frac{\Lambda}{3},
+    \label{eq:friedmann-2}
+\end{equation}
+
+where $\rho$ and $p$ are the density and the pressure of the fluid component of the Universe and $\Lambda$ is the cosmological constant.
+
+Setting the critical energy in a flat Universe ($\kappa \to 0$) like
+\begin{equation}
+    \rho_c = \frac{3H_0}{8 \pi G},
+\end{equation}
+and the Hubble parameter
+\begin{equation}
+    H \equiv \frac{\dot{a}}{a}.
+\end{equation}
+Equation \eqref{eq:friedmann-1} can be recast in terms of the normalized density components like $\Omega_{\Lambda0}  + \Omega_{m0} + \Omega_{\kappa0} = 1$, and the Hubble parameter when $t\to 0$ H_0 as
+\begin{equation}
+    H^2 = H^2_0 \left[\Omega_{\Lambda,0} + \Omega_{\kappa}\left(\frac{a_0}{a}\right)^2 + \Omega_{m0}\left(\frac{a_0}{a}\right)^3 \right],
+    \label{eq:lcdm-complete}
+\end{equation}
+where $a_0 =1 $ by normalization.
+
+In the spatially flat $\Lambda$CDM model ($\kappa=0$, $\Omega_{\kappa0} = 0$), the Hubble parameter as a function of redshift $z$ is given by:
+\begin{equation}
+    H = H_0 \sqrt{\Omega_{m0}a^3 + (1-\Omega_{m0})}
+    \label{eq:Hz_flat_lcdm_revised}
+\end{equation}
+where $H_0$ is the Hubble constant and $\Omega_{m0}$ is the present-day matter density parameter. These two parameters are the free parameters for this model.
+
+Extending the model with spatial curvature, the general equation \eqref{eq:lcdm-complete} allows for non-zero spatial curvature, characterized by $\Omega_{k0}$. The Hubble parameter is:
+\begin{equation}
+    H = H_0 \sqrt{\Omega_{m0}a^3 + \Omega_{k0}a^2 + (1 - \Omega_{m0} - \Omega_{k0})}
+    \label{eq:Hz_lcdm_curvature_revised}
+\end{equation}
+The free parameters in this case are $H_0$, $\Omega_{m0}$, and $\Omega_{k0}$. The term $(1 - \Omega_{m0} - \Omega_{k0})$ represents the dark energy density parameter $\Omega_{\Lambda 0}$.
+
+\subsection{The IDE models}
+
+IDE models propose an alternative for the $\Lambda\text{CDM}$ due the coincidence problem involving the $\rho_{\Lambda}$ SNe Ia measurements values and the QFT predictions.
+This model propose an energy exchange between dark matter ($\rho_m$) and dark energy ($\rho_{\Lambda}$) fluids governed by an interaction term $Q$ like
+\begin{equation}
+    Q = \alpha H (\rho_m + \rho_{\Lambda}),
+\end{equation}
+where $\alpha$ is the dimentionless coupling constant that relates the dimentionless parameter $\omega$ and the interaction parameter $\varepsilon$ like $\varepsilon = 3 \omega + \alpha$ \cite{MAIA}.
+
+For spatially flat Universe with this interaction, the fluids for dark matter and dark energy can be obtained by solving the differntial equations for $\dot{\rho}$. With this, the expression for these fluids are
+\begin{equation}
+    \rho_m = \rho_{m0}\left(\frac{a}{a0}\right)^{-3 + \varepsilon},
+\end{equation}
+and
+\begin{equation}
+    \rho_{\Lambda} = \rho_{\Lambda 0} + \frac{\varepsilon}{3 - \varepsilon}\rho_{m0}\left(\frac{a}{a0}\right)^{-3 + \varepsilon}.
+\end{equation}
+
+Applying in the \eqref{eq:friedmann-1}, the Hubble parameter is given by
+\begin{equation}
+    H = H_0 \sqrt{ \Omega_{m0} \left[ a^{3-\varepsilon} + \frac{\varepsilon}{3-\varepsilon}\left(a^{3-\varepsilon}-1\right) \right] + \Omega_{k0}a^2 + (1 - \Omega_{m0} - \Omega_{k0}) }
+    \label{eq:Hz_ide_curvature_revised}
+\end{equation}
+with $H_0$, $\Omega_{m0}$, $\Omega_{\kappa0}$ and $\varepsilon$ the free parameters.
+
+\section{Computational Methodology}
+\label{sec:methodology}
+\subsection{Bayesian parameter inference}
+\label{subsec:baysian_inference}
+
+A Bayesian statistical framework is used to estimate the parameters $\boldsymbol{\theta}$ for an collection of models $M$.
+According to Bayes theorem, the posteior probability distribuition of the parameters, conditioned on the observational data $\mathbf{D}$ and $M$, is given by
+\begin{equation}
+    P(\boldsymbol{\theta} \mid \mathbf{D}, M) = \frac{\mathcal{L}(\mathbf{D} \mid \boldsymbol{\theta}, M)\, \pi(\boldsymbol{\theta} \mid M)}{\mathcal{Z}(\mathbf{D} \mid M)},
+    \label{eq:bayes_theorem}
+\end{equation}
+where $\mathcal{L}(\mathbf{D} \mid \boldsymbol{\theta}, M)$ is the likelihood function, representing the probability of the data given the model parameters, $\pi(\boldsymbol{\theta} \mid M)$ denotes the prior distribution, which encodes prior knowledge about the parameters and $\mathcal{Z}(\mathbf{D} \mid M) \equiv P(\mathbf{D} \mid M)$ is the Bayesian evidence, acting as a normalization factor for the posterior and serving as a basis for model comparison.
+
+\subsection{Likelihood function}
+\label{subsec:likelihood}
+
+Considering the uncertainties on the $\boldsymbol{D}$ measurements, the quantification of the probability of observing the data given a set of model parameters $\boldsymbol{\theta}$ under the model $M$ is given by the likelihood function
+\begin{equation}
+    \mathcal{L}(\mathbf{D} \mid \boldsymbol{\theta}, M) \propto \exp\left(-\frac{1}{2} \chi^2(\boldsymbol{\theta}) \right),
+    \label{eq:likelihood_gaussian}
+\end{equation}
+where the chi suare function $\chi^2(\boldsymbol{\theta})$ is defined as:
+
+\begin{equation}
+    \chi^2(\boldsymbol{\theta}) = \sum_{i=1}^{N} \left( \frac{D_i^{\mathrm{obs}} - D_i^{\mathrm{th}}(\boldsymbol{\theta})}{\sigma_i} \right)^2.
+    \label{eq:chi2_definition}
+\end{equation}
